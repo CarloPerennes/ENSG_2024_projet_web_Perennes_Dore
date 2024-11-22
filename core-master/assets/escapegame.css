@@ -1,0 +1,32 @@
+#map {
+    height:60vh;
+    width: 80vw;
+}
+
+#inventaire {
+    height: 20vh;
+    width: 80vw;
+
+    background-color: peru;
+
+    display: flex;
+    flex-direction: row;
+}
+
+img {
+    height: 72px;
+    width: 48px;
+
+}
+
+.selected {
+    background-color: yellow;
+}
+
+#popup {
+    display: none;
+}
+
+.leaflet-popup #popup {
+    display: block;
+}

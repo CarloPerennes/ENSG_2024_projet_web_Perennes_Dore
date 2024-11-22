@@ -1,0 +1,10 @@
+<p>Trouvez le code</p>
+<form method="post" action="/code">
+<input type="number" id="digit1" name="digit1" min="0" max="9">
+<input type="number" id="digit2" name="digit2" min="0" max="9">
+<input type="number" id="digit3" name="digit3" min="0" max="9">
+<input type="number" id="digit4" name="digit4" min="0" max="9">
+
+<input type="submit" name="envoi" value="OK">
+
+</form>
