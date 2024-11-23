@@ -6,7 +6,16 @@ require_once 'flight/Flight.php';
 // require 'flight/autoload.php';
 
 Flight::route('/', function () {
-    echo 'hello world!';
+    //echo 'hello world!';
+    Flight::render('accueil');
+});
+
+Flight::route('/accueil', function () {
+    Flight::render('accueil');
+});
+
+Flight::route('/halloffame', function () {
+    Flight::render('halloffame');
 });
 
 //Connexion a la base de donnees
