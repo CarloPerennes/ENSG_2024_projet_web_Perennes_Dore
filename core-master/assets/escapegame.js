@@ -89,7 +89,7 @@ Vue.createApp({
 
             this.marker_cadenas = marker_cadenas;
             
-            let start_query = "SELECT nom,ST_AsGeoJson(point) AS point,type,icone,inventaire,texte,parent,enfant,zoom FROM objet WHERE depart";
+            let start_query = "SELECT nom,ST_AsGeoJson(point) AS point,type,icone,inventaire,texte,parent,enfant,zoom,height,width FROM objet WHERE depart";
             let geometry_name = "point";
             
             this.installation(start_query, geometry_name);
@@ -138,9 +138,9 @@ Vue.createApp({
             //console.log(object.icone);
             let marker = L.marker(latlng, {icon: L.icon({
                 iconUrl: object.icone,
-                iconSize: [64,96],
-                iconAnchor: [31,47],
-                popupAnchor: [0,0]
+                iconSize: [object.width,object.height],
+                iconAnchor: [Math.floor(object.width/2),Math.floor(object.height/2)],
+                popupAnchor: [0,-Math.floor(object.height/2)]
             })});
             if (object.type == "cadenas") {
                 marker.objet_nom = object.nom;
@@ -246,6 +246,7 @@ Vue.createApp({
             if (object.enfant == "victory") {
                 this.finish();
             } else {
+            this.layer_group[object.nom].clearLayers();
             console.log("debut debloque");
             //Query def
             let noms_enfant = object.enfant.split(',');
@@ -254,7 +255,7 @@ Vue.createApp({
                 def_array = def_array + "'" + nom + "'" + ",";
             });
             def_array = def_array.substring(0,def_array.length - 1) + "]";
-            let query = "SELECT nom,ST_AsGeoJson(point) AS point,type,icone,inventaire,texte,parent,enfant,zoom FROM objet WHERE nom = ANY (" + def_array + ")";
+            let query = "SELECT nom,ST_AsGeoJson(point) AS point,type,icone,inventaire,texte,parent,enfant,zoom,height,width FROM objet WHERE nom = ANY (" + def_array + ")";
             console.log(query);
             let geom_name = "point"
             this.installation(query, geom_name);
@@ -270,7 +271,7 @@ Vue.createApp({
     mounted() {
         this.init();
     },
-}).mount('#inventaire');
+}).mount('#app');
 
 
 function formatage (chaine) {
