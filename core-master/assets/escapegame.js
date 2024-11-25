@@ -1,25 +1,3 @@
-/*
-var map = L.map('map').setView([42.5,-0.09], 7);
-
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
-
-var key_icon = L.icon({
-    iconUrl: 'images/key.png',
-    iconSize: [64,96],
-    iconAnchor: [31,47],
-    popupAnchor: [0,0]
-});
-
-var key_marker = L.marker([51.5,-0.09], {icon: key_icon});
-var group_marker = new L.FeatureGroup();
-group_marker.addLayer(key_marker);
-
-*/
-
-
 Vue.createApp({
     data() {
         return {
@@ -43,9 +21,6 @@ Vue.createApp({
             boutonTriche: null,
 
             pseudo: null,
-            /*
-            liste_obj : [{nom: "cadenas", icone:"images/cadenas.png"},
-                        {nom: "code", icone:"images/code.png"}],*/
         };
     },
     methods: {
@@ -60,35 +35,7 @@ Vue.createApp({
             }).addTo(the_map);
             
             var marker_cadenas = new L.FeatureGroup();
-            /*
-            group_marker.addTo(the_map);
-            key_group.addTo(the_map);
-            chest_group.addTo(the_map);
-            marker_cadenas.addTo(the_map);
-            */
-            /*
-            the_map.on('zoomend', function(){
-                if (this.getZoom() < 5) {
-                    this.removeLayer(group_marker);
-                } else {
-                    this.addLayer(group_marker);
-                }
-            });
-            the_map.on('zoomend', function(){
-                if (this.getZoom() < 5) {
-                    this.removeLayer(key_group);
-                } else {
-                    this.addLayer(key_group);
-                }
-            });
-            the_map.on('zoomend', function(){
-                if (this.getZoom() < 5) {
-                    this.removeLayer(chest_group);
-                } else {
-                    this.addLayer(chest_group);
-                }
-            });
-            */
+            
             marker_cadenas.on('click', (e) => {
                 let marker = e.layer;
                 this.popup_text = marker.objet_texte;
@@ -164,13 +111,6 @@ Vue.createApp({
             });
 
             this.layer_group[object.nom] = layer_group;
-            /*
-            if (object.type != "cle") {
-                this.chest_group.addLayer(layer_group);
-            } else {
-                this.key_group.addLayer(layer_group);
-            }
-            */
 
             if (object.audio != null) {
                 this.audiopiste = object.audio;
@@ -214,17 +154,13 @@ Vue.createApp({
             var obj = e.target.feature.properties
             switch (obj.type) {
                 case "coffre":
-                    //console.log("pas_encore");
-                    //console.log(obj.parent != null && obj.parent == this.selected_object.nom);
                     if (obj.parent == this.selected_object.nom) {
-                        //console.log("passe");
                         this.debloque(obj);
                     }
                     break;
                 case "cle":
                     this.liste_obj.push(obj);
                     this.layer_group[obj.nom].clearLayers();
-                    //this.the_map.removeLayer(this.layer_group[obj.nom]);
                     break;
                 case "cadenas":
                     this.cadenas = obj;
@@ -257,21 +193,6 @@ Vue.createApp({
             }
         },
 
-        popupContent: function (target) {
-            //This is an old function. It is no more used.
-            let texte = target.feature.properties.texte;
-            let html = '<p>' + texte + '</p>' +
-                        '<form @submit.prevent="submit_function">' +
-                            '<input type="number" id="digit1" name="digit1" min="0" max="9">' +
-                            '<input type="number" id="digit2" name="digit2" min="0" max="9">' +
-                            '<input type="number" id="digit3" name="digit3" min="0" max="9">' +
-                            '<input type="number" id="digit4" name="digit4" min="0" max="9">' +
-                            '<input type="submit" name="envoi" value="OK">' +
-                        '</form>';
-            return html;
-
-        },
-
         installation: function (query, geom_name = "") {
             //Fetch request
             console.log("debut fonction");
@@ -300,7 +221,6 @@ Vue.createApp({
             } else {
             this.layer_group[object.nom].clearLayers();
             console.log("debut debloque");
-            console.log(this.boutonTriche.scoreTriche);
             //Query def
             let noms_enfant = object.enfant.split(',');
             let def_array = "ARRAY[";
@@ -400,8 +320,3 @@ Vue.createApp({
         this.init();
     },
 }).mount('#app');
-
-
-function formatage (chaine) {
-    return chaine.replace("'","\\'");
-};
