@@ -3,7 +3,7 @@ Une fois la BDD crée voici les informations de connexion :
 
 //
       $host = "localhost";
-      $database = "projet_web_";
+      $database = "projet_web";
       $user = "postgres";
       $password = "postgres";
       $port = "5432";
@@ -11,8 +11,8 @@ Une fois la BDD crée voici les informations de connexion :
 //
 
 
-- régler MAMP pour qu'il se lance dans le core master
-- dans GeoServer, installé avec JAVA 17, importer notre workspace 'heat_map'  
+- régler MAMP pour qu'il se lance dans le core master avec la version de php 7.4.16
+- dans GeoServer, installé avec JAVA 17, importer notre workspace 'heat_map' qui se trouve dans le dossier 'core-master'.
       
 
 - taper localhost dans un navigateur, normalement vous arrivez sur la page d'accueil du jeu.
