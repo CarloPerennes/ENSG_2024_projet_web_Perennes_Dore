@@ -105,30 +105,5 @@ Flight::route('POST /getTime', function() /*use ($con)*/ {
     }
 });
 
-Flight::route('POST /bddtest', function() {
-    $query = $_POST['query'];
-    //$query = "SELECT nom, ST_AsGeoJson(point) AS point FROM objet";
-    //$query = "SELECT nom, depart, inventaire FROM objet";
-    $geom_name = $_POST['geom_name'];
-    $query_result = pg_query(Flight::get('db'), $query);
-    $tableau = [];
-    $result_as_array = pg_fetch_all($query_result, PGSQL_ASSOC);
-    
-    foreach($result_as_array as $key => $ligne){
-        //$tableau[] = [$chose['nom'], json_decode($chose['point']), $chose['icone'], $chose['inventaire'], $chose['texte']];
-        if (!empty($geom_name)) {
-            $ligne[$geom_name] = json_decode($ligne[$geom_name]);
-        }
-        $tableau[] = $ligne;
-    }
-    //echo $query_result;
-    $test = '{"test":42}';
-    Flight::json($tableau);
-});
-
-Flight::route('POST /code', function () {
-    Flight::json($_POST['digit1']);
-});
-
 
 Flight::start();
