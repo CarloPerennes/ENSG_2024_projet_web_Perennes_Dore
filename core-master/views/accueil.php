@@ -19,7 +19,6 @@
             <input type="text" name="pseudo" placeholder="Nom du joueur">
             <input type="submit" value="Jouer">
         </from>
-        <a href = "/escapegame">Jouer</a>
         <a href = "/halloffame">Hall of fame</a>
     </div>
     <footer>
