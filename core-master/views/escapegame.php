@@ -7,14 +7,26 @@
     <link rel = "stylesheet" , href = "assets/escapegame.css">
 </head>
 <body>
-    <div id = "body">
-    <p>Hello world!</p>
+    <h1>The Eldorado Request</h1>
+    <div id = "game">
     <div id = 'map'>
     </div>
-    <div id = "inventaire">
-        <div v-for="obj in liste_obj">
-            <img v-if="selected_object.nom === obj.nom" :src="obj.icone" class = "selected">
-            <img v-else :src="obj.icone" @click="setSelection(obj)" class = "notselected">
+    <div id = "app">
+        <audio :src="audiopiste" controls autoplay loop></audio>
+        <?php
+        if (isset($pseudo) and !empty($pseudo)) {
+            //echo '<div id="pseudo"><input type="text" value="Test" v-model="pseudo"></div>';
+            echo '<div id="pseudo" ref="pseudo">'.$pseudo.'</div>';
+        }
+        ?>
+        <form id="triche">
+            <label id="btnTriche">Triche <input type="checkbox"></label>
+        </form>
+        <div id = "inventaire">
+            <div class = "inventaire_div" v-for="obj in liste_obj">
+                <img v-if="selected_object.nom === obj.nom" :src="obj.icone" class = "selected">
+                <img v-else :src="obj.icone" @click="setSelection(obj)" class = "notselected">
+            </div>
         </div>
         <div id="popup" ref="popup">
             {{popup_text}}
