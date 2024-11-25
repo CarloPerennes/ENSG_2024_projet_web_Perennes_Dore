@@ -10,14 +10,6 @@ Flight::route('/', function () {
     Flight::render('accueil');
 });
 
-Flight::route('/accueil', function () {
-    Flight::render('accueil');
-});
-
-Flight::route('/halloffame', function () {
-    Flight::render('halloffame');
-});
-
 //Connexion a la base de donnees
 $link = pg_connect('host=localhost dbname=projet_web user=postgres password=postgres');
 pg_set_client_encoding($link, "UNICODE");
@@ -28,8 +20,36 @@ Flight::route('/test', function() {
     echo 'connected ? ' . $link;
 });
 
-Flight::route('/escapegame', function () {
+Flight::route('/accueil', function () {
+    Flight::render('accueil');
+});
+
+Flight::route('GET /escapegame', function () {
     Flight::render('escapegame');
+});
+
+Flight::route('POST /escapegame', function () {
+    if (isset($_POST['pseudo']) and !empty($_POST['pseudo'])) {
+        $pseudo = $_POST['pseudo'];
+    } else {
+        $pseudo = "User";
+    }
+    Flight::render('escapegame', ['pseudo' => $pseudo]);
+});
+
+Flight::route('/halloffame', function() {
+    $query = "SELECT pseudo, score FROM score ORDER BY score DESC, pseudo ASC LIMIT 10";
+
+
+    $query_result = pg_query(Flight::get('db'), $query);
+    $result_as_array = pg_fetch_all($query_result, PGSQL_ASSOC);
+
+    $data = array();
+    foreach($result_as_array as $key => $row) {
+        array_push($data, $row);
+    }
+
+    Flight::render('halloffame', ['data' => $data]);
 });
 
 Flight::route('POST /bdd', function() {
@@ -63,6 +83,25 @@ Flight::route('POST /bdd', function() {
             //Renvoyer le resultat
             Flight::json($tableau);
         }
+    }
+});
+
+Flight::route('POST /getTime', function() /*use ($con)*/ {
+    $temps  = Flight::request()->data['temps'];
+    $pseudo = Flight::request()->data['pseudo'];
+    $score  = Flight::request()->data['score'];
+
+
+   
+    $query = "INSERT INTO score(pseudo,score) VALUES ($1,$2)"; // Ajout de la mise à jour de score
+
+    $result = pg_query_params(Flight::get('db'), $query, array($pseudo,$score));
+    if ($result) {
+        echo "Mise à jour réussie";
+        echo $temps . ' ' . $pseudo . ' ' . $score;
+       
+    } else {
+        echo "Problème lors de la mise à jour : " . pg_last_error(Flight::get('db'));
     }
 });
 
