@@ -98,10 +98,9 @@ Vue.createApp({
             this.marker_cadenas = marker_cadenas;
 
             // Ajout de la carte de chaleur pour la triche, seulement si le joueur clique sur le bouton triche
-            var triche = L.tileLayer.wms("http://localhost:8081/geoserver/wms", { 
+            var triche = L.tileLayer.wms("http://localhost:8080/geoserver/wms", { 
             // /!\ pour nous le port est 8081, surement nécessaire de remettre 8080  layers et format seront a change 
-            layers: 'heat_map:objet',
-            styles: 'style_heat_map',
+            layers: 'projet:objet',
             format: 'image/PNG',
             transparent: true
             });//.addTo(map);
@@ -190,7 +189,7 @@ Vue.createApp({
             if (object.type == "cadenas") {
                 marker.objet_nom = object.nom;
                 marker.objet_texte = object.texte;
-                marker.bindPopup("",{'maxWidth': 1000, 'width':900});
+                marker.bindPopup("",{'maxWidth': 750, 'width':750});
                 marker.addTo(this.marker_cadenas);
             }
             return marker;
