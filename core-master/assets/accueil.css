@@ -1,0 +1,49 @@
+body {
+    background-color: goldenrod;
+}
+
+#main {
+    height: 95vh;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    height: 13vh;
+    width: 100vh;
+    
+    margin-top: 0%;
+    margin-bottom: 0%;
+
+    padding-top: 2vh;
+    font-size:x-large;
+    color:darkgreen;
+}
+ p {
+    color: darkgreen;
+    width: 82vh;
+ }
+/*
+ a {
+    color:darkgreen;
+ }
+*/
+
+footer {
+    width: 100vh;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+
+    background-color: #bfa359;
+
+    padding-left: 380px;
+    padding-right: 380px;
+
+    margin-bottom: 0%;
+}

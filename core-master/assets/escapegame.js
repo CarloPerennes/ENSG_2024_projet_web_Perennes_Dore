@@ -30,21 +30,31 @@ Vue.createApp({
             layer_group : {},
             popup_text: "",
             cadenas: null,
-            digit1: 7,
-            digit2: 5,
-            digit3: 3,
-            digit4: 4,
-            //liste_obj : [],
+            digit1: null,
+            digit2: null,
+            digit3: null,
+            digit4: null,
+            liste_obj : [],
             selected_object: {nom: ""},
+            audiopiste: null,
+
+            start: Date.now(),
+
+            boutonTriche: null,
+
+            pseudo: null,
+            /*
             liste_obj : [{nom: "cadenas", icone:"images/cadenas.png"},
-                        {nom: "code", icone:"images/code.png"}],
+                        {nom: "code", icone:"images/code.png"}],*/
         };
     },
     methods: {
         init: function () {
-            const the_map = L.map('map', {zoomAnimation: false}).setView([42.5,-0.09], 7);
+            const the_map = L.map('map', {zoomAnimation: false}).setView([46.15252, -1.16541], 15);
 
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            the_map.flyTo([16.8,96.1496], 17);
+
+            this.osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             }).addTo(the_map);
@@ -85,11 +95,42 @@ Vue.createApp({
                 marker.setPopupContent(this.$refs.popup);
             });
 
-            this.the_map = the_map;
-
             this.marker_cadenas = marker_cadenas;
+
+            // Ajout de la carte de chaleur pour la triche, seulement si le joueur clique sur le bouton triche
+            var triche = L.tileLayer.wms("http://localhost:8081/geoserver/wms", { 
+            // /!\ pour nous le port est 8081, surement nécessaire de remettre 8080  layers et format seront a change 
+            layers: 'heat_map:objet',
+            styles: 'style_heat_map',
+            format: 'image/PNG',
+            transparent: true
+            });//.addTo(map);
+
+            var boutonTriche = document.getElementById('btnTriche');
+
+            boutonTriche.addEventListener('click', function() {
+                this.scoreTriche = true;
+    
+                if (!the_map.hasLayer(triche)) {
+                    console.log("triche");
+                    // affichage de la carte de triche
+                    triche.addTo(the_map);
+                    //boutonTriche.textContent = "Désactiver la triche"; 
+                } else {
+                    console.log("detriche");
+                    // désaffichage de la carte de triche
+                    the_map.removeLayer(triche);
+                    //boutonTriche.textContent = "Activer la triche"; 
+                }
+            });
+            // variable pour savoir si le joeur a triché et compter son score en fonction
+            boutonTriche.scoreTriche = false;
+            this.boutonTriche = boutonTriche;
+
+            this.the_map = the_map;
             
-            let start_query = "SELECT nom,ST_AsGeoJson(point) AS point,type,icone,inventaire,texte,parent,enfant,zoom,height,width FROM objet WHERE depart";
+            
+            let start_query = "SELECT nom,ST_AsGeoJson(point) AS point,type,icone,inventaire,texte,parent,enfant,zoom,height,width,audio FROM objet WHERE depart";
             let geometry_name = "point";
             
             this.installation(start_query, geometry_name);
@@ -131,6 +172,10 @@ Vue.createApp({
                 this.key_group.addLayer(layer_group);
             }
             */
+
+            if (object.audio != null) {
+                this.audiopiste = object.audio;
+            }
         },
 
         createMarker: function (geoJsonPoint, latlng) {
@@ -145,7 +190,7 @@ Vue.createApp({
             if (object.type == "cadenas") {
                 marker.objet_nom = object.nom;
                 marker.objet_texte = object.texte;
-                marker.bindPopup();
+                marker.bindPopup("",{'maxWidth': 1000, 'width':900});
                 marker.addTo(this.marker_cadenas);
             }
             return marker;
@@ -157,7 +202,7 @@ Vue.createApp({
                 //layer.bindPopup(this.popupContent)
             } else {
             if (feature.properties.type != "cle") {
-                layer.bindPopup(feature.properties.texte);
+                layer.bindPopup(feature.properties.texte, {'maxWidth': 750});
             }
             }
             layer.on({
@@ -188,6 +233,10 @@ Vue.createApp({
                 default:
                     console.log("default");
             }
+
+            if (obj.nom == "perso") {
+                this.the_map.setView([-16.4395,-68.1487], 15);
+            }
         },
 
         setSelection: function (object) {
@@ -202,6 +251,10 @@ Vue.createApp({
             console.log(this.cadenas.parent == code_try);
             if (this.cadenas.parent == code_try) {
                 this.debloque(this.cadenas);
+                this.digit1 = null;
+                this.digit2 = null;
+                this.digit3 = null;
+                this.digit4 = null;
             }
         },
 
@@ -248,6 +301,7 @@ Vue.createApp({
             } else {
             this.layer_group[object.nom].clearLayers();
             console.log("debut debloque");
+            console.log(this.boutonTriche.scoreTriche);
             //Query def
             let noms_enfant = object.enfant.split(',');
             let def_array = "ARRAY[";
@@ -255,7 +309,7 @@ Vue.createApp({
                 def_array = def_array + "'" + nom + "'" + ",";
             });
             def_array = def_array.substring(0,def_array.length - 1) + "]";
-            let query = "SELECT nom,ST_AsGeoJson(point) AS point,type,icone,inventaire,texte,parent,enfant,zoom,height,width FROM objet WHERE nom = ANY (" + def_array + ")";
+            let query = "SELECT nom,ST_AsGeoJson(point) AS point,type,icone,inventaire,texte,parent,enfant,zoom,height,width,audio FROM objet WHERE nom = ANY (" + def_array + ")";
             console.log(query);
             let geom_name = "point"
             this.installation(query, geom_name);
@@ -263,8 +317,83 @@ Vue.createApp({
         }
         },
 
+        // Fonction pour calculer le score, en fonction du temps et de l'activation ou non de la triche
+        score: function (timeString, scoreTriche) {
+            // gestion si erreur
+            if (typeof timeString !== 'string' || !timeString.includes(':')) {
+                console.error('timeString invalide ou manquant:', timeString);
+                return 0; 
+            }
+
+            // conversion du temps en string en entier (nombre de secondes)
+            var parts = timeString.split(':');
+            var hours = parseInt(parts[0], 10);
+            var minutes = parseInt(parts[1], 10);
+            var seconds = parseInt(parts[2], 10);
+
+            var totalSeconds = hours * 3600 + minutes * 60 + seconds;
+
+            // calcul du score
+            var score = 10000 - totalSeconds;
+
+            if (scoreTriche === false){
+                score = score *2;
+            } // score bonifié si le joeur ne triche pas
+
+            return score;
+        },
+
+        // Fonction pour afficher un timer et pour stocker le temps écoulé (dans timePast)
+        getTimePast: function () {
+                
+            var now = Date.now();
+            var diff = now - this.start;
+            var hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            var mins = Math.floor((diff / (1000 * 60)) % 60);
+            var sec = Math.floor((diff / 1000) % 60);
+
+            var timePast = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+            return timePast;
+        },
+
+        envoyerTemps: function(timePast, result) {
+            console.log("envoie le temps")
+            try {
+                var pseudo = this.$refs.pseudo.outerText;
+            } catch {
+                var pseudo =  "User";
+            }
+
+            fetch('/getTime', {  
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: "temps=" +encodeURIComponent(timePast)+ '&score=' + encodeURIComponent(result)+ '&pseudo=' + encodeURIComponent(pseudo),
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Réponse du serveur PHP : ' + data);
+            })
+            .catch(error => {
+                console.error("Erreur lors de l'envoi des données : ", error);
+            });
+        },
+
         finish: function () {
-            alert("Félicitation !\nVous avez gagné !!!")
+            let timeString = this.getTimePast();
+            let scoreTriche = this.boutonTriche.scoreTriche;
+            console.log("timestr");
+            console.log(timeString);
+            console.log("score_triche");
+            console.log(scoreTriche);
+
+            let score = this.score(timeString,scoreTriche);
+            console.log("score");
+            console.log(score);
+
+            this.envoyerTemps(timeString, score);
+            alert("Félicitation !\nVous avez gagné !!!\nVous avez "+score.toString() + " points");
         },
 
     },
